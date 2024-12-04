@@ -85,7 +85,7 @@ fun LoginScreen(navController: NavHostController, context: Context) {
                 val savedPassword = userPreferences.password.first()
 
                 if (email == savedEmail && password == savedPassword) {
-                    navController.navigate("home") // Navegar a HomeScreen
+                    navController.navigate("home")  // Navegar a HomeScreen después del login
                 } else {
                     errorMessage = "Credenciales incorrectas"
                 }
