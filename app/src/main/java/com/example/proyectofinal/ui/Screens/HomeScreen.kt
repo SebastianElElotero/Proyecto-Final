@@ -1,7 +1,12 @@
 package com.example.proyectofinal.ui.Screens
 
+import com.example.proyectofinal.api.RetrofitClient
+
+// HomeScreen.kt
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -22,31 +27,35 @@ import com.example.proyectofinal.data.UserPreferences
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 @Composable
 fun HomeScreen(navController: NavHostController, context: Context) {
     val userPreferences = UserPreferences(context)
 
+    // Estado para almacenar las películas y errores
+    var movies by remember { mutableStateOf<List<Movie>>(emptyList()) }
+    var errorMessage by remember { mutableStateOf("") }
+
     // Barra de búsqueda
     var searchQuery by remember { mutableStateOf("") }
 
-    // Lista de películas (simulada por ahora)
-    val movies = listOf(
-        Movie("Babadook", R.drawable.babadook_movie),
-        Movie("Nightmare on Elm Street", R.drawable.nightmare_movie),
-        Movie("Annabelle", R.drawable.annabelle_movie),
-        Movie("The Cabin in the Woods", R.drawable.cabin_in_woods_movie),
-        Movie("Chucky", R.drawable.chucky_movie),
-        Movie("The Conjuring", R.drawable.conjuring_movie),
-        Movie("Halloween", R.drawable.halloween_movie),
-        Movie("Scream", R.drawable.scream_movie),
-        Movie("Texas Massacre", R.drawable.texas_massacre_movie),
-        Movie("The Exorcist", R.drawable.the_exorcist_movie)
-    )
+    // Función para cargar las películas desde la API
+    LaunchedEffect(true) {
+        try {
+            // Llamada a la API para obtener las películas
+            val movieList = RetrofitClient.movieApiService.getMovies()
+            movies = movieList
+        } catch (e: HttpException) {
+            errorMessage = "Error al cargar las películas: ${e.message()}"
+        } catch (e: Exception) {
+            errorMessage = "Ocurrió un error inesperado"
+        }
+    }
 
     // Filtrar las películas según la búsqueda
     val filteredMovies = movies.filter {
-        it.title.contains(searchQuery, ignoreCase = true) // Ignora mayúsculas y minúsculas
+        it.name.contains(searchQuery, ignoreCase = true) // Ignora mayúsculas y minúsculas
     }
 
     Column(
@@ -80,6 +89,11 @@ fun HomeScreen(navController: NavHostController, context: Context) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Si hay un error, mostramos el mensaje de error
+        if (errorMessage.isNotEmpty()) {
+            Text(text = errorMessage, color = Color.Red)
+        }
+
         // Rejilla de películas (3 columnas por fila)
         LazyVerticalGrid(
             columns = GridCells.Fixed(3), // 3 columnas por fila
@@ -108,19 +122,16 @@ fun MovieCard(movie: Movie, onClick: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = movie.image),
-            contentDescription = movie.title,
+            painter = painterResource(id = R.drawable.annabelle_movie), // Usar una imagen por defecto o la URL de la imagen de la API
+            contentDescription = movie.name,
             modifier = Modifier.fillMaxWidth().height(200.dp) // Tamaño de la imagen
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = movie.title,
+            text = movie.name,
             fontWeight = FontWeight.Bold,
             color = Color.Black,
             fontSize = 16.sp
         )
     }
 }
-
-// Data class para representar la película
-data class Movie(val id: Int, val title: String, val image: Int)

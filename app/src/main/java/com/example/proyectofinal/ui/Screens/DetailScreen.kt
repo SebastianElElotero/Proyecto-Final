@@ -25,99 +25,69 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 
 @Composable
-fun DetailScreen(navController: NavHostController, movieId: Int, context: Context) {
-    // Estado para almacenar los detalles de la película
-    val movieDetails = remember { mutableStateOf<MovieDetails?>(null) }
-    val coroutineScope = rememberCoroutineScope()
+fun DetailScreen(navController: NavHostController, movieId: Int) {
+    // Obtener los detalles de la película (por ahora, los simulamos)
+    val movie = getMovieById(movieId)
 
-    // Llamada a la API para obtener los detalles
-    LaunchedEffect(movieId) {
-        coroutineScope.launch {
-            try {
-                val response = fetchMovieDetails(movieId, context)
-                movieDetails.value = response
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Imagen de la película
+        Image(
+            painter = painterResource(id = R.drawable.annabelle_movie), // Aquí puedes usar la URL de la API
+            contentDescription = movie.name,
+            modifier = Modifier.fillMaxWidth().height(300.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Título de la película
+        Text(
+            text = movie.name,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Descripción de la película
+        Text(
+            text = movie.description,
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Género y duración
+        Text(
+            text = "Género: ${movie.genre} | Duración: ${movie.duration} min",
+            fontSize = 14.sp,
+            color = Color.DarkGray
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Botón para regresar
+        Button(onClick = { navController.popBackStack() }) {
+            Text(text = "Volver a Home")
         }
-    }
-
-    // UI de la pantalla de detalles
-    movieDetails.value?.let { movie ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Imagen de la película
-            Image(
-                painter = painterResource(id = R.drawable.placeholder_movie), // Placeholder
-                contentDescription = movie.name,
-                modifier = Modifier.fillMaxWidth().height(300.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Título de la película
-            Text(
-                text = movie.name,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Descripción
-            Text(
-                text = movie.description,
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Género y duración
-            Text(
-                text = "Género: ${movie.genre} | Duración: ${movie.duration} min",
-                fontSize = 14.sp,
-                color = Color.DarkGray
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Botón para regresar a HomeScreen
-            Button(onClick = { navController.popBackStack() }) {
-                Text(text = "Volver a Home")
-            }
-        }
-    } ?: run {
-        // Pantalla de carga
-        Text(text = "Cargando detalles...", modifier = Modifier.align(Alignment.CenterHorizontally))
     }
 }
 
-// Modelo de datos para los detalles de la película
-data class MovieDetails(
-    val id: Int,
-    val name: String,
-    val description: String,
-    val genre: String,
-    val duration: Int
-)
-
-// Función para obtener los detalles de la película desde la API
-suspend fun fetchMovieDetails(movieId: Int, context: Context): MovieDetails {
-    val client = OkHttpClient()
-    val request = Request.Builder()
-        .url("http://<API_URL>/movies/$movieId/")
-        .build()
-
-    client.newCall(request).execute().use { response ->
-        if (!response.isSuccessful) throw IOException("Error de conexión: ${response.message}")
-        val body = response.body?.string() ?: throw IOException("Cuerpo vacío")
-        return Gson().fromJson(body, MovieDetails::class.java)
-    }
+// Simulación de obtener la película por ID (cuando la API esté funcionando, reemplazar con Retrofit)
+fun getMovieById(id: Int): Movie {
+    return Movie(
+        id = id,
+        name = "Inception",
+        description = "A mind-bending thriller directed by Christopher Nolan.",
+        genre = "Sci-Fi",
+        duration = 148,
+        imageUrl = "https://example.com/inception.jpg"
+    )
 }
