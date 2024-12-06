@@ -1,15 +1,10 @@
 package com.example.proyectofinal.ui.Screens
 
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,17 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.core.IOException
 import androidx.navigation.NavHostController
 import com.example.proyectofinal.R
-import com.google.gson.Gson
-import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
+import com.example.proyectofinal.models.Movie
 
 @Composable
 fun DetailScreen(navController: NavHostController, movieId: Int) {
-    // Obtener los detalles de la película (por ahora, los simulamos)
-    val movie = getMovieById(movieId)
+    val movie = getMovieById(movieId) ?: return // Verifica que la película exista
 
     Column(
         modifier = Modifier
@@ -36,16 +27,14 @@ fun DetailScreen(navController: NavHostController, movieId: Int) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Imagen de la película
         Image(
-            painter = painterResource(id = R.drawable.annabelle_movie), // Aquí puedes usar la URL de la API
+            painter = painterResource(id = R.drawable.annabelle_movie), // Sustituir con URL si es necesario
             contentDescription = movie.name,
             modifier = Modifier.fillMaxWidth().height(300.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título de la película
         Text(
             text = movie.name,
             fontSize = 24.sp,
@@ -55,7 +44,6 @@ fun DetailScreen(navController: NavHostController, movieId: Int) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Descripción de la película
         Text(
             text = movie.description,
             fontSize = 16.sp,
@@ -64,7 +52,6 @@ fun DetailScreen(navController: NavHostController, movieId: Int) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Género y duración
         Text(
             text = "Género: ${movie.genre} | Duración: ${movie.duration} min",
             fontSize = 14.sp,
@@ -73,15 +60,13 @@ fun DetailScreen(navController: NavHostController, movieId: Int) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Botón para regresar
         Button(onClick = { navController.popBackStack() }) {
             Text(text = "Volver a Home")
         }
     }
 }
 
-// Simulación de obtener la película por ID (cuando la API esté funcionando, reemplazar con Retrofit)
-fun getMovieById(id: Int): Movie {
+fun getMovieById(id: Int): Movie? {
     return Movie(
         id = id,
         name = "Inception",

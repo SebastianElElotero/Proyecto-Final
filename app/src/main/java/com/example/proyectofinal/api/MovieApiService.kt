@@ -2,6 +2,7 @@ package com.example.proyectofinal.api
 
 // MovieApiService.kt
 
+import com.example.proyectofinal.models.Movie
 import retrofit2.http.GET
 
 interface MovieApiService {
